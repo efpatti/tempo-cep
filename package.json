@@ -10,7 +10,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-xml-parser": "^1.1.8",
+    "safe-buffer": "^5.2.1",
+    "timers-browserify": "^2.0.12",
+    "web-vitals": "^2.1.4",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
     "start": "react-scripts start",

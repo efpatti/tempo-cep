@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
+import XMLParser from 'react-xml-parser';
 
 const App = () => {
+  const [weather, setWeather] = useState(null);
   const [cep, setCep] = useState("");
   const [address, setAddress] = useState(null);
   const [error, setError] = useState(null);
+  const [city, setCity] = useState("");
 
   const handleChange = (event) => {
     setCep(event.target.value);
@@ -16,11 +19,26 @@ const App = () => {
 
     try {
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-
       setAddress(response.data);
+      setCity(response.data.localidade); // Defina a cidade com base no CEP
     } catch (error) {
       setError("CEP não encontrado");
       console.error(error);
+    }
+  };
+
+  const weatherApi = async (eventWeather) => {
+    eventWeather.preventDefault();
+    setError(null);
+
+    try {
+      const response = await axios.get(`http://servicos.cptec.inpe.br/XML/capitais/condicoesAtuais.xml`);
+      const xmlData = new XMLParser().parseFromString(response.data);
+      const temperature = xmlData.getElementsByTagName('temperatura')[0].value;
+      setWeather(temperature);
+    } catch (error) {
+      setError("Cidade não encontrada");
+      console.log(error);
     }
   };
 
@@ -52,7 +70,7 @@ const App = () => {
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
             >
-              Buscar
+              Conferir endereço
             </button>
           </div>
         </form>
@@ -67,9 +85,18 @@ const App = () => {
             <p>
               {address.localidade} - {address.uf}
             </p>
-            <button className="rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white">
+            <button
+              className="rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white"
+              onClick={weatherApi}
+            >
               Conferir temperatura
             </button>
+          </div>
+        )}
+        {weather && (
+          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+            <p className="font-bold">Temperatura:</p>
+            <p>{weather}</p>
           </div>
         )}
         {error && (

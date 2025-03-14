@@ -7,7 +7,7 @@ const App = () => {
  const [address, setAddress] = useState(null);
  const [error, setError] = useState(null);
  const [city, setCity] = useState("");
- const [loading, setLoading] = useState(null);
+ const [loading, setLoading] = useState(false); // Estado de loading corrigido
 
  const handleChange = (event) => {
   setCep(event.target.value);
@@ -30,6 +30,7 @@ const App = () => {
  const weatherApi = async (eventWeather) => {
   eventWeather.preventDefault();
   setError(null);
+  setLoading(true); // Inicia o loading
 
   try {
    const response = await axios.get(
@@ -50,6 +51,8 @@ const App = () => {
   } catch (error) {
    setError("Cidade não encontrada");
    console.error(error);
+  } finally {
+   setLoading(false); // Finaliza o loading
   }
  };
 
@@ -87,6 +90,7 @@ const App = () => {
       </div>
      </form>
     )}
+
     {address && (
      <div
       className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 w-full rounded-md shadow-md"
@@ -99,10 +103,13 @@ const App = () => {
        {address.localidade} - {address.uf}
       </p>
 
-      <div className="flex justify-between mt-4 gap-2">
+      <div className="flex items-center mt-4 gap-2">
        <button
-        className="w-1/2 rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white"
+        className={`w-1/2 rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white ${
+         loading || weather ? "opacity-0" : "opacity-100"
+        }`}
         onClick={weatherApi}
+        disabled={loading} // Desabilita o botão enquanto carrega
        >
         Conferir temperatura
        </button>
@@ -122,7 +129,13 @@ const App = () => {
      </div>
     )}
 
-    {weather && (
+    {loading && (
+     <div className="flex justify-center items-center p-4 h-20">
+      <h1>Carregando...</h1>
+     </div>
+    )}
+
+    {weather && !loading && (
      <div
       className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4"
       role="alert"
@@ -131,6 +144,7 @@ const App = () => {
       <p>{weather}°C</p>
      </div>
     )}
+
     {error && (
      <div
       className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"

@@ -34,10 +34,18 @@ const App = () => {
    const response = await axios.get(
     `https://viacep.com.br/ws/${cep.replace("-", "")}/json/`
    );
-   setAddress(response.data);
-   setCity(response.data.localidade);
+
+   if (response.data.erro) {
+    // Caso o CEP não seja encontrado, a API retorna um campo "erro" como true
+    setError("CEP inválido. Tente novamente.");
+    setAddress(null);
+    setCity("");
+   } else {
+    setAddress(response.data);
+    setCity(response.data.localidade);
+   }
   } catch (error) {
-   setError("CEP não encontrado");
+   setError("Erro ao buscar o CEP. Tente novamente.");
    console.error(error);
   }
  };
@@ -64,7 +72,7 @@ const App = () => {
    );
    setWeather(response.data.current_observation.condition.temperature);
   } catch (error) {
-   setError("Cidade não encontrada");
+   setError("Cidade não encontrada.");
    console.error(error);
   } finally {
    setLoading(false);

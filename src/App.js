@@ -9,9 +9,8 @@ const App = () => {
  const [city, setCity] = useState("");
  const [loading, setLoading] = useState(false);
 
- // Função para formatar o CEP enquanto o usuário digita
  const formatCep = (value) => {
-  const cepNumerico = value.replace(/\D/g, ""); // Remove tudo que não for número
+  const cepNumerico = value.replace(/\D/g, "");
   return cepNumerico.length > 5
    ? `${cepNumerico.slice(0, 5)}-${cepNumerico.slice(5, 8)}`
    : cepNumerico;
@@ -73,29 +72,29 @@ const App = () => {
  };
 
  return (
-  <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
-   <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-    <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+  <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-purple-800 via-indigo-700 to-blue-600 p-8">
+   <div className="w-full max-w-md bg-white shadow-xl rounded-3xl p-8">
+    <h1 className="text-3xl font-semibold text-center text-indigo-700 mb-6">
      Consulta de Endereço e Clima
     </h1>
 
     {!address && (
-     <form onSubmit={handleSubmit} className="space-y-4">
+     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
        <label className="block text-gray-700 font-medium mb-2">
         Digite o CEP:
        </label>
        <input
-        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className="w-full px-4 py-3 border border-indigo-500 bg-gray-100 text-gray-800 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
         type="text"
         placeholder="Ex: 01001-000"
         value={cep}
         onChange={handleChange}
-        maxLength={9} // Limita o número de caracteres no input
+        maxLength={9}
        />
       </div>
       <button
-       className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-semibold shadow-md"
+       className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md"
        type="submit"
       >
        Buscar Endereço
@@ -104,24 +103,28 @@ const App = () => {
     )}
 
     {address && (
-     <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-500 rounded-md shadow-md">
-      <p className="text-lg font-semibold text-green-800">Endereço:</p>
-      <p>{address.logradouro || "Logradouro não disponível"}</p>
-      <p>{address.bairro || "Bairro não disponível"}</p>
-      <p>
+     <div className="mt-6 p-6 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-md">
+      <p className="text-lg font-semibold text-indigo-700">Endereço:</p>
+      <p className="text-gray-800">
+       {address.logradouro || "Logradouro não disponível"}
+      </p>
+      <p className="text-gray-800">
+       {address.bairro || "Bairro não disponível"}
+      </p>
+      <p className="text-gray-800">
        {address.localidade} - {address.uf}
       </p>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between mt-6">
        <button
-        className="w-1/2 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition font-semibold shadow-md disabled:opacity-50"
+        className="w-1/2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md disabled:opacity-50"
         onClick={weatherApi}
         disabled={loading || weather}
        >
         {loading ? "Carregando..." : "Ver Temperatura"}
        </button>
        <button
-        className="w-1/2 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition font-semibold shadow-md ml-2"
+        className="w-1/2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md ml-2"
         onClick={() => {
          setCep("");
          setAddress(null);
@@ -137,16 +140,18 @@ const App = () => {
     )}
 
     {weather && !loading && (
-     <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 rounded-md shadow-md">
-      <p className="text-lg font-semibold text-blue-800">Temperatura Atual:</p>
-      <p className="text-2xl font-bold">{weather}°C</p>
+     <div className="mt-6 p-6 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-md">
+      <p className="text-lg font-semibold text-indigo-700">
+       Temperatura Atual:
+      </p>
+      <p className="text-3xl font-bold text-gray-800">{weather}°C</p>
      </div>
     )}
 
     {error && (
-     <div className="mt-4 p-4 bg-red-100 border-l-4 border-red-500 rounded-md shadow-md">
-      <p className="text-lg font-semibold text-red-800">Erro:</p>
-      <p>{error}</p>
+     <div className="mt-6 p-6 bg-red-900 border-l-4 border-red-500 rounded-lg shadow-md">
+      <p className="text-lg font-semibold text-red-400">Erro:</p>
+      <p className="text-white">{error}</p>
      </div>
     )}
    </div>

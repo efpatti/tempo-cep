@@ -7,18 +7,34 @@ const App = () => {
  const [address, setAddress] = useState(null);
  const [error, setError] = useState(null);
  const [city, setCity] = useState("");
- const [loading, setLoading] = useState(false); // Estado de loading corrigido
+ const [loading, setLoading] = useState(false);
+
+ // Função para formatar o CEP enquanto o usuário digita
+ const formatCep = (value) => {
+  const cepNumerico = value.replace(/\D/g, ""); // Remove tudo que não for número
+  return cepNumerico.length > 5
+   ? `${cepNumerico.slice(0, 5)}-${cepNumerico.slice(5, 8)}`
+   : cepNumerico;
+ };
 
  const handleChange = (event) => {
-  setCep(event.target.value);
+  const formattedCep = formatCep(event.target.value);
+  setCep(formattedCep);
  };
 
  const handleSubmit = async (event) => {
   event.preventDefault();
   setError(null);
 
+  if (cep.length !== 9) {
+   setError("CEP inválido. Formato correto: 00000-000");
+   return;
+  }
+
   try {
-   const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+   const response = await axios.get(
+    `https://viacep.com.br/ws/${cep.replace("-", "")}/json/`
+   );
    setAddress(response.data);
    setCity(response.data.localidade);
   } catch (error) {
@@ -30,7 +46,7 @@ const App = () => {
  const weatherApi = async (eventWeather) => {
   eventWeather.preventDefault();
   setError(null);
-  setLoading(true); // Inicia o loading
+  setLoading(true);
 
   try {
    const response = await axios.get(
@@ -52,69 +68,60 @@ const App = () => {
    setError("Cidade não encontrada");
    console.error(error);
   } finally {
-   setLoading(false); // Finaliza o loading
+   setLoading(false);
   }
  };
 
  return (
-  <div className="flex justify-center items-center h-screen">
-   <div className="w-full max-w-md">
+  <div className="flex justify-center items-center min-h-screen bg-gray-100 p-6">
+   <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+    <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+     Consulta de Endereço e Clima
+    </h1>
+
     {!address && (
-     <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-     >
-      <div className="mb-4">
-       <label
-        className="block text-gray-700 text-sm font-bold mb-2"
-        htmlFor="cep"
-       >
-        CEP
+     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+       <label className="block text-gray-700 font-medium mb-2">
+        Digite o CEP:
        </label>
        <input
-        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        id="cep"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         type="text"
-        placeholder="Digite o CEP"
+        placeholder="Ex: 01001-000"
         value={cep}
         onChange={handleChange}
+        maxLength={9} // Limita o número de caracteres no input
        />
       </div>
-      <div className="flex items-center justify-between">
-       <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        type="submit"
-       >
-        Conferir endereço
-       </button>
-      </div>
+      <button
+       className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-semibold shadow-md"
+       type="submit"
+      >
+       Buscar Endereço
+      </button>
      </form>
     )}
 
     {address && (
-     <div
-      className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 w-full rounded-md shadow-md"
-      role="alert"
-     >
-      <p className="font-bold">Endereço:</p>
+     <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-500 rounded-md shadow-md">
+      <p className="text-lg font-semibold text-green-800">Endereço:</p>
       <p>{address.logradouro || "Logradouro não disponível"}</p>
       <p>{address.bairro || "Bairro não disponível"}</p>
       <p>
        {address.localidade} - {address.uf}
       </p>
 
-      <div className="flex items-center mt-4 gap-2">
+      <div className="flex justify-between mt-4">
        <button
-        className={`w-1/2 rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white ${
-         loading || weather ? "opacity-0" : "opacity-100"
-        }`}
+        className="w-1/2 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition font-semibold shadow-md disabled:opacity-50"
         onClick={weatherApi}
-        disabled={loading} // Desabilita o botão enquanto carrega
+        disabled={loading || weather}
        >
-        Conferir temperatura
+        {loading ? "Carregando..." : "Ver Temperatura"}
        </button>
        <button
-        className="w-1/2 rounded-md border border-green-500 p-2 hover:bg-opacity-50 hover:bg-green-500 ease-in-out duration-150 hover:text-white"
+        className="w-1/2 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition font-semibold shadow-md ml-2"
         onClick={() => {
          setCep("");
          setAddress(null);
@@ -123,34 +130,22 @@ const App = () => {
          setError(null);
         }}
        >
-        Buscar outro CEP
+        Novo CEP
        </button>
       </div>
      </div>
     )}
 
-    {loading && (
-     <div className="flex justify-center items-center p-4 h-20">
-      <h1>Carregando...</h1>
-     </div>
-    )}
-
     {weather && !loading && (
-     <div
-      className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4"
-      role="alert"
-     >
-      <p className="font-bold">Temperatura:</p>
-      <p>{weather}°C</p>
+     <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 rounded-md shadow-md">
+      <p className="text-lg font-semibold text-blue-800">Temperatura Atual:</p>
+      <p className="text-2xl font-bold">{weather}°C</p>
      </div>
     )}
 
     {error && (
-     <div
-      className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
-      role="alert"
-     >
-      <p className="font-bold">Erro:</p>
+     <div className="mt-4 p-4 bg-red-100 border-l-4 border-red-500 rounded-md shadow-md">
+      <p className="text-lg font-semibold text-red-800">Erro:</p>
       <p>{error}</p>
      </div>
     )}
